@@ -4,7 +4,7 @@
     {
         static void Main(string[] args)
         {
-            int searchedDuration = 200;
+            int searchedDuration = 600;
             //Console.WriteLine("Geben Sie die gewünschte Laufzeit ein: ");
             //searchedDuration = Convert.ToInt32(Console.ReadLine());
             const int arrSize = 5;
@@ -51,6 +51,20 @@
             recursiveTest(arr, new List<int>(), 0, arrSize, ref counter, finalList, songs, searchedDuration);
 
             Console.WriteLine("Anzahl Kombinationen: " + counter);
+            Console.WriteLine("Searched Duration: " + searchedDuration);
+
+            foreach (List<int> bs in finalList)
+            {
+                Console.Write(checkPLLength(bs, songs)+ "s  ");
+                Console.Write("[ ");
+                foreach (int x in bs)
+                {
+                    Console.Write(x + " ");
+                }
+                Console.WriteLine("]");
+            }
+
+            //Console.WriteLine(finalList);
 
             void recursiveTest(int[] arr, List<int> testList, int n, int max, ref ulong counter, List<List<int>> finalList, List<Song> songs, int searchedDuration)
             {
@@ -60,13 +74,13 @@
                 }
                 counter++;
                 testList.Add(arr[n]);
-
+                /*
                 Console.Write("[ ");
                 foreach (int x in testList)
                 {
                     Console.Write(x + " ");
                 }
-                Console.WriteLine("]");
+                Console.WriteLine("]");*/
                 // Testen der Kombination
                 testCombination(testList, finalList, songs, searchedDuration);
 
@@ -79,9 +93,28 @@
 
             void testCombination(List<int> testList, List<List<int>> finalList, List<Song> songs, int searchedDuration)
             {
-                if (finalList.Count <= 10)
+                if (finalList.Count < 10)
                 {
                     finalList.Add(new List<int>(testList));
+                }
+                else
+                {
+                    int testSongsDuration = checkPLLength(testList, songs);
+                    if (testSongsDuration > searchedDuration)
+                    {
+                        return;
+                    }
+                    int diffTestSongs = searchedDuration - testSongsDuration;
+                    foreach (List<int> actualSongOfFinalList in finalList)
+                    {
+                        int diffActualSongs = searchedDuration - checkPLLength(actualSongOfFinalList, songs);
+                        if (diffTestSongs < diffActualSongs)
+                        {
+                            finalList.Insert(finalList.IndexOf(actualSongOfFinalList), new List<int>(testList));
+                            finalList.RemoveAt(finalList.Count - 1);
+                            break;
+                        }
+                    }
                 }
             }
 
@@ -90,7 +123,10 @@
             {
                 int totalSeconds = 0;
 
-
+                foreach(int i in testList)
+                {
+                    totalSeconds += songs[i].Duration;
+                }
 
                 return totalSeconds;
             }
